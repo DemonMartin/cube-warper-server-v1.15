@@ -1,0 +1,31 @@
+name: Build v1.15 server pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: [README.md]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build server pack
+        run: bash build.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.15 >/dev/null 2>&1; then
+            gh release upload v1.15 dist/Cube-Warper-server-v1.15.zip --clobber
+          else
+            gh release create v1.15 dist/Cube-Warper-server-v1.15.zip \
+              --title "Cube Warper v1.15 server files (unofficial)" \
+              --notes "Unofficial server pack built from the public v1.14 server pack and the public v1.15 files. See the README for how it works."
+          fi
